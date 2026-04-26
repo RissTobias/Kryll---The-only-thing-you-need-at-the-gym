@@ -1,16 +1,69 @@
-# React + Vite
+# Kryll
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A minimalist gym tracking PWA. React + Vite + Tailwind, with Supabase for auth and storage. Deployed to GitHub Pages.
 
-Currently, two official plugins are available:
+## How the pieces fit
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **GitHub Pages** serves the static app (HTML/CSS/JS bundle).
+- **Supabase** stores users and their workout/session data. Row-Level Security (RLS) makes sure each user can only read and write their own rows.
+- The browser holds nothing sensitive — even if someone steals the bundled `VITE_SUPABASE_KEY`, RLS prevents access to other users' data.
 
-## React Compiler
+## One-time setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Supabase
 
-## Expanding the ESLint configuration
+1. Open your project at [supabase.com](https://supabase.com) → SQL Editor → New query.
+2. Paste the contents of [`supabase-schema.sql`](supabase-schema.sql) and run it.
+3. (Optional, recommended for personal/dev use) Authentication → Providers → Email → toggle off "Confirm email" so signups don't require clicking a confirmation link.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 2. Local `.env`
+
+Copy `.env.example` to `.env` and fill in your project URL + publishable/anon key (Supabase → Project Settings → API).
+
+```
+VITE_SUPABASE_URL=https://<your-project>.supabase.co
+VITE_SUPABASE_KEY=<your-publishable-or-anon-key>
+```
+
+### 3. GitHub repo secrets (for deploy)
+
+In the repo on GitHub: Settings → Secrets and variables → Actions → New repository secret. Add the same two names:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_KEY`
+
+The GitHub Actions workflow in [.github/workflows/deploy.yml](.github/workflows/deploy.yml) reads these at build time.
+
+### 4. Enable GitHub Pages
+
+Repo → Settings → Pages → "Build and deployment" → Source: **GitHub Actions**.
+
+After the next push to `main`, the workflow will build and publish. Your site will be at:
+
+```
+https://risstobias.github.io/Kryll---The-only-thing-you-need-at-the-gym/
+```
+
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Project layout
+
+- [src/supabase.js](src/supabase.js) — Supabase client.
+- [src/auth.jsx](src/auth.jsx) — `AuthProvider` + `useAuth` hook.
+- [src/data.js](src/data.js) — All cloud reads/writes for workouts, sessions, settings.
+- [src/components/AuthScreen.jsx](src/components/AuthScreen.jsx) — Sign-in / sign-up / password reset UI.
+- [src/components/WorkoutView.jsx](src/components/WorkoutView.jsx) — Active-workout screen.
+- [src/components/Settings.jsx](src/components/Settings.jsx) — Workout editor + sign-out.
+- [src/components/ProgressView.jsx](src/components/ProgressView.jsx) — Progress charts + XML export.

@@ -59,7 +59,7 @@ function useThemeClasses(theme) {
 
 // ── Workout List ───────────────────────────────────────────────────────────────
 
-function WorkoutList({ workouts, activeWorkoutId, theme, onThemeToggle, onSelect, onCreate, onEdit, onDelete, onClose }) {
+function WorkoutList({ workouts, activeWorkoutId, theme, onThemeToggle, onSelect, onCreate, onEdit, onDelete, onClose, onSignOut, userEmail }) {
   const t = useThemeClasses(theme)
 
   return (
@@ -73,6 +73,24 @@ function WorkoutList({ workouts, activeWorkoutId, theme, onThemeToggle, onSelect
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 pb-10">
+
+        {/* Account */}
+        {userEmail && (
+          <>
+            <p className={`text-xs uppercase tracking-widest mb-3 ${t.textFaint}`}>Account</p>
+            <div className={`flex items-center justify-between rounded-2xl px-4 py-4 mb-8 ${t.bgCard}`}>
+              <span className={`text-sm truncate mr-3 ${t.textMuted}`}>{userEmail}</span>
+              <button
+                onClick={onSignOut}
+                className={`text-sm font-medium px-3 py-1.5 rounded-xl transition-colors ${
+                  t.isDark ? 'bg-neutral-800 hover:bg-neutral-700 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                }`}
+              >
+                Abmelden
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Theme toggle */}
         <p className={`text-xs uppercase tracking-widest mb-3 ${t.textFaint}`}>Appearance</p>
@@ -313,7 +331,7 @@ function WorkoutEditor({ workout, theme, onSave, onBack }) {
 
 // ── Main Settings Component ────────────────────────────────────────────────────
 
-export default function Settings({ workouts, setWorkouts, activeWorkoutId, setActiveWorkoutId, theme, onThemeToggle, onClose }) {
+export default function Settings({ workouts, activeWorkoutId, setActiveWorkoutId, theme, onThemeToggle, onSaveWorkout, onDeleteWorkout, onSignOut, userEmail, onClose }) {
   const [editingWorkout, setEditingWorkout] = useState(null)
 
   const handleCreate = () => {
@@ -325,19 +343,8 @@ export default function Settings({ workouts, setWorkouts, activeWorkoutId, setAc
   }
 
   const handleSave = (saved) => {
-    const exists = workouts.some(w => w.id === saved.id)
-    if (exists) {
-      setWorkouts(workouts.map(w => w.id === saved.id ? saved : w))
-    } else {
-      setWorkouts([...workouts, saved])
-      setActiveWorkoutId(saved.id)
-    }
+    onSaveWorkout(saved)
     setEditingWorkout(null)
-  }
-
-  const handleDelete = (id) => {
-    setWorkouts(workouts.filter(w => w.id !== id))
-    if (activeWorkoutId === id) setActiveWorkoutId(null)
   }
 
   return (
@@ -358,8 +365,10 @@ export default function Settings({ workouts, setWorkouts, activeWorkoutId, setAc
           onSelect={setActiveWorkoutId}
           onCreate={handleCreate}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={onDeleteWorkout}
           onClose={onClose}
+          onSignOut={onSignOut}
+          userEmail={userEmail}
         />
       )}
     </div>
