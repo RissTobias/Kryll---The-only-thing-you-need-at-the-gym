@@ -15,11 +15,11 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
     e.preventDefault()
     setError(null)
     if (password.length < 8) {
-      setError('Passwort muss mindestens 8 Zeichen haben.')
+      setError('Password must be at least 8 characters.')
       return
     }
     if (password !== confirm) {
-      setError('Passwörter stimmen nicht überein.')
+      setError("Passwords don't match.")
       return
     }
     setBusy(true)
@@ -29,7 +29,7 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
       setDone(true)
       clearRecovery()
     } catch (err) {
-      setError(err.message || 'Etwas ist schiefgelaufen.')
+      setError(err.message || 'Something went wrong.')
     } finally {
       setBusy(false)
     }
@@ -39,9 +39,9 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center px-6 text-center gap-4 ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
         <div className="text-5xl mb-2">✓</div>
-        <h2 className="text-2xl font-bold">Passwort geändert</h2>
+        <h2 className="text-2xl font-bold">Password changed</h2>
         <p className={`text-sm max-w-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-          Du bist jetzt mit dem neuen Passwort eingeloggt.
+          You're now signed in with the new password.
         </p>
       </div>
     )
@@ -51,9 +51,9 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
     <div className={`min-h-screen flex flex-col items-center justify-center px-6 ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold mb-2">Neues Passwort</h1>
+          <h1 className="text-4xl font-bold mb-2">New password</h1>
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            Wähle ein neues Passwort für deinen Account
+            Choose a new password for your account
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
             autoComplete="new-password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="Neues Passwort"
+            placeholder="New password"
             className={`rounded-2xl px-5 py-4 outline-none transition-colors ${
               isDark
                 ? 'bg-neutral-900 placeholder-neutral-600 focus:bg-neutral-800'
@@ -75,7 +75,7 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
             autoComplete="new-password"
             value={confirm}
             onChange={e => setConfirm(e.target.value)}
-            placeholder="Passwort bestätigen"
+            placeholder="Confirm password"
             className={`rounded-2xl px-5 py-4 outline-none transition-colors ${
               isDark
                 ? 'bg-neutral-900 placeholder-neutral-600 focus:bg-neutral-800'
@@ -92,7 +92,7 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
               isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-gray-900 text-white hover:bg-gray-700'
             }`}
           >
-            {busy ? '…' : 'Passwort speichern'}
+            {busy ? '…' : 'Save password'}
           </button>
         </form>
 
@@ -101,7 +101,7 @@ export default function NewPasswordScreen({ theme = 'dark' }) {
             onClick={async () => { await signOut(); clearRecovery() }}
             className="underline-offset-2 hover:underline"
           >
-            Abbrechen
+            Cancel
           </button>
         </div>
       </div>

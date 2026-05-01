@@ -164,15 +164,86 @@ function generateXML(sessions, workouts) {
 
 function downloadXML(sessions, workouts) {
   const xml = generateXML(sessions, workouts)
-  const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' })
+  triggerDownload(xml, `gym-data-${today()}.xml`, 'application/xml;charset=utf-8')
+}
+
+// ── CSV Export ─────────────────────────────────────────────────────────────────
+
+function today() {
+  return new Date().toISOString().split('T')[0]
+}
+
+// RFC 4180 escaping: wrap in quotes if value contains comma, quote, newline, or CR.
+// Inner quotes get doubled.
+function escapeCSV(value) {
+  const s = String(value ?? '')
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  return s
+}
+
+function rowsToCSV(rows) {
+  // \r\n line ending so Excel on Windows is happy.
+  return rows.map(r => r.map(escapeCSV).join(',')).join('\r\n')
+}
+
+function triggerDownload(text, filename, mime) {
+  // Prepend UTF-8 BOM so Excel renders umlauts / non-ASCII correctly.
+  const blob = new Blob(['﻿', text], { type: mime })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `gym-data-${new Date().toISOString().split('T')[0]}.xml`
+  a.download = filename
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+function generateSessionsCSV(sessions) {
+  const header = ['date', 'workout', 'exercise', 'set', 'weight_kg', 'reps']
+  const rows = [header]
+  // Sort by date ascending so the file reads chronologically.
+  const sorted = [...sessions].sort((a, b) => a.date.localeCompare(b.date))
+  for (const s of sorted) {
+    for (const ex of s.exercises) {
+      ex.sets.forEach((set, i) => {
+        rows.push([s.date, s.workoutName, ex.name, i + 1, set.weight, set.reps])
+      })
+    }
+  }
+  return rowsToCSV(rows)
+}
+
+function generateProgressCSV(workouts, sessions) {
+  const header = ['workout', 'exercise', 'month', 'max_weight_kg']
+  const rows = [header]
+  for (const w of workouts) {
+    const wSessions = sessions.filter(s => s.workoutId === w.id)
+    for (const ex of w.exercises) {
+      const byMonth = {}
+      wSessions.forEach(session => {
+        const month = session.date.substring(0, 7)
+        const sEx = session.exercises.find(e => e.exerciseId === ex.id)
+        if (!sEx || !sEx.sets.length) return
+        const maxW = Math.max(...sEx.sets.map(s => s.weight))
+        if (byMonth[month] === undefined || maxW > byMonth[month]) byMonth[month] = maxW
+      })
+      Object.entries(byMonth)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .forEach(([month, max]) => {
+          rows.push([w.name, ex.name, month, max])
+        })
+    }
+  }
+  return rowsToCSV(rows)
+}
+
+function downloadSessionsCSV(sessions) {
+  triggerDownload(generateSessionsCSV(sessions), `gym-sessions-${today()}.csv`, 'text/csv;charset=utf-8')
+}
+
+function downloadProgressCSV(workouts, sessions) {
+  triggerDownload(generateProgressCSV(workouts, sessions), `gym-progress-${today()}.csv`, 'text/csv;charset=utf-8')
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
@@ -202,7 +273,7 @@ export default function ProgressView({ sessions, workouts, activeWorkoutId, them
         >
           <BackIcon />
         </button>
-        <h2 className="text-xl font-bold">Fortschritt</h2>
+        <h2 className="text-xl font-bold">Progress</h2>
         <div className="w-8" />
       </div>
 
@@ -211,16 +282,16 @@ export default function ProgressView({ sessions, workouts, activeWorkoutId, them
         {/* No workout */}
         {!activeWorkout && (
           <div className="flex items-center justify-center h-40">
-            <p className={isDark ? 'text-gray-500' : 'text-gray-400'}>Kein Training ausgewählt.</p>
+            <p className={isDark ? 'text-gray-500' : 'text-gray-400'}>No workout selected.</p>
           </div>
         )}
 
         {/* No sessions */}
         {activeWorkout && workoutSessions.length === 0 && (
           <div className="flex flex-col items-center justify-center h-40 text-center gap-2">
-            <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>Noch keine Sessions gespeichert.</p>
+            <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>No sessions saved yet.</p>
             <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-              Schließe ein Training ab um hier deinen Fortschritt zu sehen.
+              Finish a workout to see your progress here.
             </p>
           </div>
         )}
@@ -232,12 +303,12 @@ export default function ProgressView({ sessions, workouts, activeWorkoutId, them
               <div key={exercise.id}>
                 <h3 className="text-lg font-bold mb-1">{exercise.name}</h3>
                 <p className={`text-xs mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                  Maximales Gewicht pro Monat (kg)
+                  Max weight per month (kg)
                 </p>
 
                 {data.length === 0 ? (
                   <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                    Noch keine Daten für diese Übung.
+                    No data for this exercise yet.
                   </p>
                 ) : (
                   <div className={`rounded-2xl p-4 ${isDark ? 'bg-neutral-900' : 'bg-white shadow-sm'}`}>
@@ -249,23 +320,50 @@ export default function ProgressView({ sessions, workouts, activeWorkoutId, them
           </div>
         )}
 
-        {/* XML Export — always shown at the bottom when data exists */}
+        {/* Export — always shown at the bottom when data exists */}
         {sessions.length > 0 && (
           <div className={`mt-10 pt-8 border-t ${isDark ? 'border-neutral-800' : 'border-gray-200'}`}>
-            <p className={`text-xs uppercase tracking-widest mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-              Daten exportieren
+            <p className={`text-xs uppercase tracking-widest mb-1 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+              Export data
             </p>
-            <button
-              onClick={() => downloadXML(sessions, workouts)}
-              className={`w-full flex items-center justify-center gap-3 rounded-2xl py-4 font-medium transition-colors ${
-                isDark
-                  ? 'bg-neutral-900 hover:bg-neutral-800 text-gray-300'
-                  : 'bg-white hover:bg-gray-50 text-gray-600 shadow-sm'
-              }`}
-            >
-              <DownloadIcon />
-              Trainingsdaten als XML herunterladen
-            </button>
+            <p className={`text-xs mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+              CSV files open directly in Excel.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => downloadSessionsCSV(sessions)}
+                className={`w-full flex items-center justify-center gap-3 rounded-2xl py-4 font-medium transition-colors ${
+                  isDark
+                    ? 'bg-neutral-900 hover:bg-neutral-800 text-gray-300'
+                    : 'bg-white hover:bg-gray-50 text-gray-600 shadow-sm'
+                }`}
+              >
+                <DownloadIcon />
+                All sessions (CSV)
+              </button>
+              <button
+                onClick={() => downloadProgressCSV(workouts, sessions)}
+                className={`w-full flex items-center justify-center gap-3 rounded-2xl py-4 font-medium transition-colors ${
+                  isDark
+                    ? 'bg-neutral-900 hover:bg-neutral-800 text-gray-300'
+                    : 'bg-white hover:bg-gray-50 text-gray-600 shadow-sm'
+                }`}
+              >
+                <DownloadIcon />
+                Progress chart data (CSV)
+              </button>
+              <button
+                onClick={() => downloadXML(sessions, workouts)}
+                className={`w-full flex items-center justify-center gap-3 rounded-2xl py-4 font-medium transition-colors ${
+                  isDark
+                    ? 'bg-neutral-900 hover:bg-neutral-800 text-gray-300'
+                    : 'bg-white hover:bg-gray-50 text-gray-600 shadow-sm'
+                }`}
+              >
+                <DownloadIcon />
+                Full backup (XML)
+              </button>
+            </div>
           </div>
         )}
       </div>

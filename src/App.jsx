@@ -44,7 +44,7 @@ function AuthenticatedApp({ user, signOut }) {
         setReady(true)
       } catch (err) {
         if (cancelled) return
-        setLoadError(err.message || 'Daten konnten nicht geladen werden.')
+        setLoadError(err.message || "Couldn't load your data.")
         setReady(true)
       }
     })()
@@ -71,7 +71,7 @@ function AuthenticatedApp({ user, signOut }) {
       await upsertWorkout(user.id, saved)
     } catch (err) {
       console.error('Workout save failed:', err)
-      alert('Konnte Training nicht speichern: ' + err.message)
+      alert("Couldn't save workout: " + err.message)
     }
   }
 
@@ -84,7 +84,7 @@ function AuthenticatedApp({ user, signOut }) {
     } catch (err) {
       console.error('Workout delete failed:', err)
       setWorkouts(prev)
-      alert('Konnte Training nicht löschen: ' + err.message)
+      alert("Couldn't delete workout: " + err.message)
     }
   }
 
@@ -110,7 +110,7 @@ function AuthenticatedApp({ user, signOut }) {
       if (updatedWorkout) await upsertWorkout(user.id, updatedWorkout)
     } catch (err) {
       console.error('Session save failed:', err)
-      alert('Konnte Training nicht speichern: ' + err.message)
+      alert("Couldn't save workout: " + err.message)
     }
   }
 
@@ -119,7 +119,7 @@ function AuthenticatedApp({ user, signOut }) {
   if (!ready) {
     return (
       <div className={`h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-black text-gray-500' : 'bg-gray-50 text-gray-400'}`}>
-        Lade…
+        Loading…
       </div>
     )
   }
@@ -128,7 +128,7 @@ function AuthenticatedApp({ user, signOut }) {
     return (
       <div className={`h-screen flex flex-col items-center justify-center px-6 gap-4 ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
         <p className="text-red-400 text-sm text-center">{loadError}</p>
-        <button onClick={() => signOut()} className="text-sm underline">Abmelden</button>
+        <button onClick={() => signOut()} className="text-sm underline">Sign out</button>
       </div>
     )
   }

@@ -86,7 +86,7 @@ function WorkoutList({ workouts, activeWorkoutId, theme, onThemeToggle, onSelect
                   t.isDark ? 'bg-neutral-800 hover:bg-neutral-700 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
                 }`}
               >
-                Abmelden
+                Sign out
               </button>
             </div>
           </>

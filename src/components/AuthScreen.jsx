@@ -18,11 +18,11 @@ export default function AuthScreen({ theme = 'dark' }) {
     setInfo(null)
 
     if (!email.trim() || !password) {
-      setError('Email und Passwort eingeben.')
+      setError('Enter email and password.')
       return
     }
     if (mode === 'signup' && password.length < 8) {
-      setError('Passwort muss mindestens 8 Zeichen haben.')
+      setError('Password must be at least 8 characters.')
       return
     }
 
@@ -35,15 +35,15 @@ export default function AuthScreen({ theme = 'dark' }) {
         const { data, error } = await signUp(email.trim(), password)
         if (error) throw error
         if (!data.session) {
-          setInfo('Account erstellt. Schau in deine E-Mails zur Bestätigung.')
+          setInfo('Account created. Check your email to confirm.')
         }
       } else if (mode === 'reset') {
         const { error } = await resetPassword(email.trim())
         if (error) throw error
-        setInfo('Wenn ein Account existiert, schicken wir dir einen Reset-Link.')
+        setInfo("If an account exists, we'll send a reset link.")
       }
     } catch (err) {
-      setError(err.message || 'Etwas ist schiefgelaufen.')
+      setError(err.message || 'Something went wrong.')
     } finally {
       setBusy(false)
     }
@@ -61,9 +61,9 @@ export default function AuthScreen({ theme = 'dark' }) {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold mb-2">Kryll</h1>
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            {mode === 'signin' && 'Melde dich an um weiterzumachen'}
-            {mode === 'signup' && 'Erstelle deinen Account'}
-            {mode === 'reset' && 'Passwort zurücksetzen'}
+            {mode === 'signin' && 'Sign in to continue'}
+            {mode === 'signup' && 'Create your account'}
+            {mode === 'reset' && 'Reset your password'}
           </p>
         </div>
 
@@ -73,7 +73,7 @@ export default function AuthScreen({ theme = 'dark' }) {
             autoComplete="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="E-Mail"
+            placeholder="Email"
             className={`rounded-2xl px-5 py-4 outline-none transition-colors ${
               isDark
                 ? 'bg-neutral-900 placeholder-neutral-600 focus:bg-neutral-800'
@@ -87,7 +87,7 @@ export default function AuthScreen({ theme = 'dark' }) {
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Passwort"
+              placeholder="Password"
               className={`rounded-2xl px-5 py-4 outline-none transition-colors ${
                 isDark
                   ? 'bg-neutral-900 placeholder-neutral-600 focus:bg-neutral-800'
@@ -110,7 +110,7 @@ export default function AuthScreen({ theme = 'dark' }) {
               isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-gray-900 text-white hover:bg-gray-700'
             }`}
           >
-            {busy ? '…' : mode === 'signin' ? 'Anmelden' : mode === 'signup' ? 'Account erstellen' : 'Reset-Link senden'}
+            {busy ? '…' : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send reset link'}
           </button>
         </form>
 
@@ -118,23 +118,23 @@ export default function AuthScreen({ theme = 'dark' }) {
           {mode === 'signin' && (
             <>
               <button onClick={() => switchMode('signup')} className="underline-offset-2 hover:underline">
-                Noch keinen Account? Registrieren
+                No account yet? Sign up
               </button>
               <div>
                 <button onClick={() => switchMode('reset')} className="underline-offset-2 hover:underline">
-                  Passwort vergessen?
+                  Forgot password?
                 </button>
               </div>
             </>
           )}
           {mode === 'signup' && (
             <button onClick={() => switchMode('signin')} className="underline-offset-2 hover:underline">
-              Schon einen Account? Anmelden
+              Already have an account? Sign in
             </button>
           )}
           {mode === 'reset' && (
             <button onClick={() => switchMode('signin')} className="underline-offset-2 hover:underline">
-              Zurück zum Anmelden
+              Back to sign in
             </button>
           )}
         </div>

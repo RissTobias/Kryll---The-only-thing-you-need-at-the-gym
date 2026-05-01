@@ -41,9 +41,9 @@ function ConfirmDialog({ isDark, onCancel, onConfirm }) {
 
       {/* Card */}
       <div className={`relative w-full max-w-sm rounded-3xl p-6 ${isDark ? 'bg-neutral-900' : 'bg-white'}`}>
-        <h3 className="text-xl font-bold mb-2 text-center">Bist du fertig?</h3>
+        <h3 className="text-xl font-bold mb-2 text-center">All done?</h3>
         <p className={`text-sm text-center mb-6 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-          Das Training wird gespeichert und deine Ziele für nächstes Mal aktualisiert.
+          Your workout will be saved and next session's targets updated.
         </p>
         <div className="flex gap-3">
           <button
@@ -52,7 +52,7 @@ function ConfirmDialog({ isDark, onCancel, onConfirm }) {
               isDark ? 'bg-neutral-800 hover:bg-neutral-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
             }`}
           >
-            Nein
+            No
           </button>
           <button
             onClick={onConfirm}
@@ -60,7 +60,7 @@ function ConfirmDialog({ isDark, onCancel, onConfirm }) {
               isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-gray-900 text-white hover:bg-gray-700'
             }`}
           >
-            Ja, speichern
+            Yes, save
           </button>
         </div>
       </div>
@@ -141,9 +141,9 @@ export default function WorkoutView({ workout, theme, onSettingsClick, onProgres
     return (
       <div className="h-screen flex flex-col items-center justify-center px-8 text-center gap-6">
         <div className="text-5xl mb-2">✓</div>
-        <h2 className="text-2xl font-bold">Training gespeichert!</h2>
+        <h2 className="text-2xl font-bold">Workout saved!</h2>
         <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-          Deine Ziele wurden für nächstes Mal aktualisiert.
+          Your targets have been updated for next time.
         </p>
         <button
           onClick={handleStartNew}
@@ -151,7 +151,7 @@ export default function WorkoutView({ workout, theme, onSettingsClick, onProgres
             isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-gray-900 text-white hover:bg-gray-700'
           }`}
         >
-          Neue Session starten
+          Start new session
         </button>
       </div>
     )
@@ -170,7 +170,7 @@ export default function WorkoutView({ workout, theme, onSettingsClick, onProgres
           <button
             onClick={onProgressClick}
             className={`transition-colors p-1 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-900'}`}
-            aria-label="Fortschritt"
+            aria-label="Progress"
           >
             <ChartIcon />
           </button>
@@ -180,7 +180,7 @@ export default function WorkoutView({ workout, theme, onSettingsClick, onProgres
           <button
             onClick={onSettingsClick}
             className={`transition-colors p-1 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-900'}`}
-            aria-label="Einstellungen"
+            aria-label="Settings"
           >
             <SettingsIcon />
           </button>
@@ -190,13 +190,13 @@ export default function WorkoutView({ workout, theme, onSettingsClick, onProgres
         <div className="flex-1 flex flex-col px-6 overflow-hidden">
           {!workout ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
-              <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Kein Training ausgewählt</p>
-              <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Tippe auf das Einstellungs-Symbol um eines zu erstellen</p>
+              <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>No workout selected</p>
+              <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Tap the settings icon to create one</p>
             </div>
           ) : exercises.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <p className={`text-center ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                Dieses Training hat noch keine Übungen.<br />Geh zu den Einstellungen um welche hinzuzufügen.
+                This workout has no exercises yet.<br />Go to settings to add some.
               </p>
             </div>
           ) : (
@@ -205,7 +205,7 @@ export default function WorkoutView({ workout, theme, onSettingsClick, onProgres
                 {currentIndex + 1} / {exercises.length}
               </p>
               <h1 className="text-4xl font-bold mb-6 leading-tight">
-                {exercise.name || 'Unbenannte Übung'}
+                {exercise.name || 'Unnamed exercise'}
               </h1>
 
               {/* Sets */}
@@ -289,7 +289,7 @@ export default function WorkoutView({ workout, theme, onSettingsClick, onProgres
                 isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-gray-900 text-white hover:bg-gray-700'
               }`}
             >
-              Training abschließen
+              Finish workout
             </button>
           </div>
         )}
