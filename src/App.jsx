@@ -9,6 +9,7 @@ import WorkoutView from './components/WorkoutView'
 import Settings from './components/Settings'
 import ProgressView from './components/ProgressView'
 import AuthScreen from './components/AuthScreen'
+import NewPasswordScreen from './components/NewPasswordScreen'
 
 function AuthenticatedApp({ user, signOut }) {
   const [ready, setReady] = useState(false)
@@ -170,9 +171,10 @@ function AuthenticatedApp({ user, signOut }) {
 }
 
 export default function App() {
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, recovery, signOut } = useAuth()
 
   if (loading) return <div className="h-screen bg-black" />
+  if (recovery) return <NewPasswordScreen theme="dark" />
   if (!user) return <AuthScreen theme="dark" />
   return <AuthenticatedApp key={user.id} user={user} signOut={signOut} />
 }
